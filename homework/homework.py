@@ -93,7 +93,7 @@
 # {'type': 'cm_matrix', 'dataset': 'test', 'true_0': {"predicted_0": 15562, "predicte_1": 650}, 'true_1': {"predicted_0": 2490, "predicted_1": 1420}}
 #
 
-# Librerias necesarias
+# Librerias
 import pandas as pd
 import numpy as np
 import json
@@ -106,11 +106,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score, balanced_accuracy_score, recall_score, f1_score, confusion_matrix
 
-# Cargar y limpiar datos
+# Cargar
 train_data = pd.read_csv("files/input/train_default_of_credit_card_clients.csv")
 test_data = pd.read_csv("files/input/test_default_of_credit_card_clients.csv")
 
-
+# funcion de limpieza
 def clean_data(df):
     df = df.rename(columns={"default payment next month": "default"})
     df = df.drop(columns=["ID"], errors='ignore')
@@ -121,7 +121,7 @@ def clean_data(df):
 train_data = clean_data(train_data)
 test_data = clean_data(test_data)
 
-# Dividir datos en X & Y para entrenamiento y prueba
+# Dividir datos
 X_train, y_train = train_data.drop(columns=["default"]), train_data["default"]
 X_test, y_test = test_data.drop(columns=["default"]), test_data["default"]
 
@@ -138,7 +138,7 @@ model = Pipeline([
     ('classifier', RandomForestClassifier(random_state=42))
 ])
 
-# Optimización de hiperparámetros
+# Optimización
 param_grid = {
     'classifier__n_estimators': [50, 100, 200],
     'classifier__max_depth': [None, 10, 20],
@@ -148,7 +148,7 @@ param_grid = {
 grid_search = GridSearchCV(model, param_grid, cv=10, scoring='balanced_accuracy', n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
-# Guardar el modelo comprimido
+# Guardar modelo mejorado
 best_model = grid_search.best_estimator_
 with gzip.open("files/models/model.pkl.gz", "wb") as f:
     pickle.dump(best_model, f)
@@ -169,7 +169,7 @@ def metricas(model, X, y, dataset_name):
 train_metrics = metricas(best_model, X_train, y_train, "train")
 test_metrics = metricas(best_model, X_test, y_test, "test")
 
-# Calcular matrices de confusión
+# Calcular
 def confusion(model, X, y, dataset_name):
     y_pred = model.predict(X)
     cm = confusion_matrix(y, y_pred)
